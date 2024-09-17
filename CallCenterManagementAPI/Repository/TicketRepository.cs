@@ -1,6 +1,7 @@
 ﻿using CallCenterManagementAPI.Data;
 using CallCenterManagementAPI.Interface;
 using CallCenterManagementAPI.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace CallCenterManagementAPI.Repository
 {
@@ -12,34 +13,37 @@ namespace CallCenterManagementAPI.Repository
 			_context = context;
 		}
 
-		public Task AddAsync(Ticket entity)
+		public async Task AddAsync(Ticket entity)
 		{
-			throw new NotImplementedException();
+			await _context.Ticket.AddAsync(entity);
+			await _context.SaveChangesAsync();
 		}
 
-		public Task DeleteAsync(int id)
+		public async Task DeleteAsync(int id)
 		{
-			throw new NotImplementedException();
+			var customer = await _context.Ticket.FindAsync(id);
+			if (customer != null)
+			{
+				customer.IsDeleted = true;
+				await _context.SaveChangesAsync();
+			}
+		}
+		public async Task<IEnumerable<Ticket>> GetAllAsync(int pageNumber, int pageSize)
+		{
+			return await _context.Ticket.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
 		}
 
-		public Task<IEnumerable<Ticket>> GetAllAsync()
+		public async Task<Ticket> GetByIdAsync(int id)
 		{
-			throw new NotImplementedException();
+			return await _context.Ticket.FirstOrDefaultAsync(r => r.Id == id);
 		}
 
-		public Task<IEnumerable<Ticket>> GetAllAsync(int pageNumber, int pageSize)
+		public async Task UpdateAsync(Ticket entity)
 		{
-			throw new NotImplementedException();
-		}
-
-		public Task<Ticket> GetByIdAsync(int id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task UpdateAsync(Ticket entity)
-		{
-			throw new NotImplementedException();
+			_context.Entry(entity).State = EntityState.Modified;
+			await _context.SaveChangesAsync();
 		}
 	}
 }

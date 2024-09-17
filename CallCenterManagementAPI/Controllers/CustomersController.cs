@@ -42,7 +42,7 @@ namespace CallCenterManagementAPI.Controllers
 
 		// GET: api/Customers/5
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Customer>> GetCustomer(int id)
+		public async Task<ActionResult<Customer>> GetCustomerAsync(int id)
 		{
 			_logger.LogInformation($"Getting Customer with ID {id}");
 			var customer = await _repo.GetByIdAsync(id);
@@ -59,7 +59,7 @@ namespace CallCenterManagementAPI.Controllers
 		// PUT: api/Customers/5
 		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 		[HttpPut]
-		public async Task<IActionResult> UpdateCustomer(UpdateCustomerDTO customerDTO)
+		public async Task<IActionResult> UpdateCustomerAsync(UpdateCustomerDTO customerDTO)
 		{
 			_logger.LogInformation($"Updating Customer with ID {customerDTO.Id}");
 			var customer = _mapper.Map<Customer>(customerDTO);
@@ -71,7 +71,7 @@ namespace CallCenterManagementAPI.Controllers
 		// POST: api/Customers
 		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 		[HttpPost]
-		public async Task<ActionResult<Customer>> CreateCustomer(CreateCustomerDTO customerDTO)
+		public async Task<ActionResult<Customer>> CreateCustomerAsync(CreateCustomerDTO customerDTO)
 		{
 			_logger.LogInformation("Adding a new customer");
 			var customer = _mapper.Map<Customer>(customerDTO);
@@ -83,7 +83,7 @@ namespace CallCenterManagementAPI.Controllers
 
 		// DELETE: api/Customers/5
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteCustomer(int id)
+		public async Task<IActionResult> DeleteCustomerAsync(int id)
 		{
 			_logger.LogInformation($"Deleting customer with ID {id}");
 			await _repo.DeleteAsync(id);

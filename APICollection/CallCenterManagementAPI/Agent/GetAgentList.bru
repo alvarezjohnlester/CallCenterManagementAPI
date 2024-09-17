@@ -7,10 +7,14 @@ meta {
 get {
   url: https://localhost:7135/api/Agents?pageNumber=1&pageSize=10
   body: none
-  auth: none
+  auth: bearer
 }
 
 params:query {
   pageNumber: 1
   pageSize: 10
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwianRpIjoiNjc1YzQ1MDQtNzBjOS00MWUwLWE4ZGMtYzAzYjRiOTE0ODAzIiwiZXhwIjoxNzI2NTg0NTM3LCJpc3MiOiJDYWxsQ2VudGVyTWFuYWdlbWVudElzc3VlciIsImF1ZCI6IkNhbGxDZW50ZXJNYW5hZ2VtZW50QXVkaWVuY2UifQ.Fkxqop6bkj15Ic1N8utgEZRjT4SSMAP0Bp6sKXzRCo8
 }

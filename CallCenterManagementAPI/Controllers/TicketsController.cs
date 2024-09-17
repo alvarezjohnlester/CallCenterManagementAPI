@@ -7,118 +7,99 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CallCenterManagementAPI.Data;
 using CallCenterManagementAPI.Model;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using CallCenterManagementAPI.Interface;
+using CallCenterManagementAPI.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CallCenterManagementAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TicketsController : ControllerBase
+	[Authorize]
+	public class TicketsController : ControllerBase
     {
-        private readonly CallCenterManagementAPIContext _context;
-
-        public TicketsController(CallCenterManagementAPIContext context)
+		private readonly IRepository<Ticket> _repo;
+		private readonly ILogger<TicketsController> _logger;
+		private readonly IMapper _mapper;
+		public TicketsController(IRepository<Ticket> repo, IMapper mapper, ILogger<TicketsController> logger)
         {
-            _context = context;
-        }
+			_repo = repo;
+			_mapper = mapper;
+			_logger = logger;
+		}
 
         // GET: api/Tickets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetTicket()
+        public async Task<ActionResult<IEnumerable<Ticket>>> GetTicketListAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-          if (_context.Ticket == null)
-          {
-              return NotFound();
-          }
-            return await _context.Ticket.ToListAsync();
-        }
+			_logger.LogInformation("Getting all Tickets");
+			var ticket = await _repo.GetAllAsync(pageNumber, pageSize);
+			return Ok(ticket);
+		}
 
         // GET: api/Tickets/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Ticket>> GetTicket(int id)
+        public async Task<ActionResult<Ticket>> GetTicketAsync(int id)
         {
-          if (_context.Ticket == null)
-          {
-              return NotFound();
-          }
-            var ticket = await _context.Ticket.FindAsync(id);
+			_logger.LogInformation($"Getting Ticket with ID {id}");
+			var ticket = await _repo.GetByIdAsync(id);
 
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+			if (ticket == null)
+			{
+				_logger.LogWarning($"Ticket with ID {id} not found");
+				return NotFound();
+			}
 
-            return ticket;
-        }
+			return Ok(ticket);
+		}
 
         // PUT: api/Tickets/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTicket(int id, Ticket ticket)
+        [HttpPut]
+        public async Task<IActionResult> UpdateTicketAsync(UpdateTicketDTO ticketDto)
         {
-            if (id != ticket.Id)
-            {
-                return BadRequest();
-            }
+			_logger.LogInformation($"Updating Ticket with ID {ticketDto.Id}");
+			var tempticket = await _repo.GetByIdAsync(ticketDto.Id);
+			if (tempticket == null)
+			{
+				return NotFound();
+			}
+			var ticket = _mapper.Map<Ticket>(ticketDto);
+			ticket.UpdatedAt = DateTime.Now;
+			ticket.CreatedAt= tempticket.CreatedAt;
 
-            _context.Entry(ticket).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TicketExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+			await _repo.UpdateAsync(ticket);
+			_logger.LogInformation($"Updated");
+			return Ok("Successfully Updated");
+		}
 
         // POST: api/Tickets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Ticket>> PostTicket(Ticket ticket)
+        public async Task<ActionResult<Ticket>> CreateTicketAsync(CreateTicketDTO ticketDto)
         {
-          if (_context.Ticket == null)
-          {
-              return Problem("Entity set 'CallCenterManagementAPIContext.Ticket'  is null.");
-          }
-            _context.Ticket.Add(ticket);
-            await _context.SaveChangesAsync();
+			_logger.LogInformation("Adding a new ticket");
+			var ticket = _mapper.Map<Ticket>(ticketDto);
+			ticket.CreatedAt = DateTime.Now;
+			ticket.Status = Enums.TicketStatus.Open;
 
-            return CreatedAtAction("GetTicket", new { id = ticket.Id }, ticket);
-        }
+			await _repo.AddAsync(ticket);
+
+			_logger.LogInformation("Successfully added");
+			return Created("/api/tickets/" + ticket.Id, ticket);
+		}
 
         // DELETE: api/Tickets/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTicket(int id)
+        public async Task<IActionResult> DeleteTicketAsync(int id)
         {
-            if (_context.Ticket == null)
-            {
-                return NotFound();
-            }
-            var ticket = await _context.Ticket.FindAsync(id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+			_logger.LogInformation($"Deleting ticket with ID {id}");
+			await _repo.DeleteAsync(id);
+			_logger.LogInformation($"Deleted");
 
-            _context.Ticket.Remove(ticket);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool TicketExists(int id)
-        {
-            return (_context.Ticket?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+			return Ok("Sucessfully Deleted");
+		}
     }
 }
