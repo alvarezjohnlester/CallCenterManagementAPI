@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using CallCenterManagementAPI.Service;
+using System.Text.Json;
 namespace CallCenterManagementAPI
 {
 	public class Program
@@ -36,6 +37,7 @@ namespace CallCenterManagementAPI
 			builder.Services.AddScoped<IRepository<Ticket>, TicketRepository>();
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<TokenService>();
+
 			// Add authentication services
 			builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
@@ -49,6 +51,17 @@ namespace CallCenterManagementAPI
 						ValidIssuer = builder.Configuration["Jwt:Issuer"],
 						ValidAudience = builder.Configuration["Jwt:Audience"],
 						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+					};
+					options.Events = new JwtBearerEvents
+					{
+						OnChallenge = context =>
+						{
+							context.HandleResponse();
+							context.Response.StatusCode = 401;
+							context.Response.ContentType = "application/json";
+							var result = JsonSerializer.Serialize(new { message = "Unauthorized access" });
+							return context.Response.WriteAsync(result);
+						}
 					};
 				});
 			builder.Services.AddAuthorization();

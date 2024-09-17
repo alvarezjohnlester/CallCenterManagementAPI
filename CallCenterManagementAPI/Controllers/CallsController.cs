@@ -7,118 +7,93 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CallCenterManagementAPI.Data;
 using CallCenterManagementAPI.Model;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
+using CallCenterManagementAPI.Interface;
+using CallCenterManagementAPI.DTO;
 
 namespace CallCenterManagementAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CallsController : ControllerBase
+	
+	public class CallsController : ControllerBase
     {
-        private readonly CallCenterManagementAPIContext _context;
-
-        public CallsController(CallCenterManagementAPIContext context)
+		private readonly IRepository<Call> _repo;
+		private readonly ILogger<CallsController> _logger;
+		private readonly IMapper _mapper;
+		public CallsController(IRepository<Call> repo, IMapper mapper, ILogger<CallsController> logger)
         {
-            _context = context;
-        }
+			_repo = repo;
+			_mapper = mapper;
+			_logger = logger;
+		}
 
-        // GET: api/Calls
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Call>>> GetCall()
+		// GET: api/Calls
+		[HttpGet]
+		[AllowAnonymous] // This allows unauthenticated access to this endpoint
+		public async Task<ActionResult<IEnumerable<Call>>> GetCallListAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+		{
+			_logger.LogInformation("Getting all calls");
+			var call = await _repo.GetAllAsync(pageNumber, pageSize);
+			return Ok(call);
+		}
+
+		// GET: api/Calls/5
+		[HttpGet("{id}")]
+		[AllowAnonymous] // This allows unauthenticated access to this endpoint
+		public async Task<ActionResult<Call>> GetCallAsync(int id)
         {
-          if (_context.Call == null)
-          {
-              return NotFound();
-          }
-            return await _context.Call.ToListAsync();
-        }
+			_logger.LogInformation($"Getting call with ID {id}");
+			var call = await _repo.GetByIdAsync(id);
 
-        // GET: api/Calls/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Call>> GetCall(int id)
-        {
-          if (_context.Call == null)
-          {
-              return NotFound();
-          }
-            var call = await _context.Call.FindAsync(id);
+			if (call == null)
+			{
+				_logger.LogWarning($"Call with ID {id} not found");
+				return NotFound();
+			}
 
-            if (call == null)
-            {
-                return NotFound();
-            }
-
-            return call;
-        }
+			return Ok(call);
+		}
 
         // PUT: api/Calls/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCall(int id, Call call)
+        [HttpPut]
+		[Authorize]
+		public async Task<IActionResult> UpdateCallAsync(UpdateCallDTO callDto)
         {
-            if (id != call.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(call).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CallExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+			_logger.LogInformation($"Updating running activity with ID {callDto.Id}");
+			var call = _mapper.Map<Call>(callDto);
+			await _repo.UpdateAsync(call);
+			_logger.LogInformation($"Updated");
+			return Ok("Successfully Updated");
+		}
 
         // POST: api/Calls
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Call>> PostCall(Call call)
+		[Authorize]
+		public async Task<ActionResult<Call>> CreateCall(CreateCallDTO callDTO)
         {
-          if (_context.Call == null)
-          {
-              return Problem("Entity set 'CallCenterManagementAPIContext.Call'  is null.");
-          }
-            _context.Call.Add(call);
-            await _context.SaveChangesAsync();
+			_logger.LogInformation("Adding a new call");
+			var Call = _mapper.Map<Call>(callDTO);
+			Call.Status = Enums.CallStatus.Queued;
+			await _repo.AddAsync(Call);
 
-            return CreatedAtAction("GetCall", new { id = call.Id }, call);
-        }
+			_logger.LogInformation("Successfully added");
+			return Created("/api/calls/" + Call.Id, Call);
+		}
 
         // DELETE: api/Calls/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCall(int id)
+		[Authorize]
+		public async Task<IActionResult> DeleteCall(int id)
         {
-            if (_context.Call == null)
-            {
-                return NotFound();
-            }
-            var call = await _context.Call.FindAsync(id);
-            if (call == null)
-            {
-                return NotFound();
-            }
+			_logger.LogInformation($"Deleting call with ID {id}");
+			await _repo.DeleteAsync(id);
+			_logger.LogInformation($"Deleted");
 
-            _context.Call.Remove(call);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CallExists(int id)
-        {
-            return (_context.Call?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+			return Ok("Sucessfully Deleted");
+		}
     }
 }

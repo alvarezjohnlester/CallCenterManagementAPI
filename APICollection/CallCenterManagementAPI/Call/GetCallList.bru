@@ -1,0 +1,16 @@
+meta {
+  name: GetCallList
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://localhost:7135/api/Calls?pageNumber=1&pageSize=10
+  body: none
+  auth: none
+}
+
+params:query {
+  pageNumber: 1
+  pageSize: 10
+}

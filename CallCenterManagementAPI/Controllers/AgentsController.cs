@@ -48,7 +48,7 @@ namespace CallCenterManagementAPI.Controllers
 
 			if (agent == null)
 			{
-				_logger.LogWarning($"aAgenty with ID {id} not found");
+				_logger.LogWarning($"Agent with ID {id} not found");
 				return NotFound();
 			}
 
@@ -57,14 +57,14 @@ namespace CallCenterManagementAPI.Controllers
 
 		// PUT: api/Agents/5
 		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-		[HttpPut("{id}")]
+		[HttpPut]
 		public async Task<IActionResult> UpdateAgent(UpdateAgentDTO agentDto)
 		{
 			_logger.LogInformation($"Updating running activity with ID {agentDto.Id}");
 			var agent = _mapper.Map<Agent>(agentDto);
 			await _repo.UpdateAsync(agent);
 			_logger.LogInformation($"Updated");
-			return NoContent();
+			return Ok("Successfully Updated");
 		}
 
 		// POST: api/Agents
