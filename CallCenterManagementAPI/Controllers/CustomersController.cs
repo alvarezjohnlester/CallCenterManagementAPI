@@ -7,132 +7,90 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CallCenterManagementAPI.Data;
 using CallCenterManagementAPI.Model;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using CallCenterManagementAPI.Interface;
+using CallCenterManagementAPI.DTO;
 
 namespace CallCenterManagementAPI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CustomersController : ControllerBase
-    {
-        private readonly CallCenterManagementAPIContext _context;
+	[Route("api/[controller]")]
+	[ApiController]
+	[Authorize]
+	public class CustomersController : ControllerBase
+	{
+		private readonly IRepository<Customer> _repo;
+		private readonly ILogger<CustomersController> _logger;
+		private readonly IMapper _mapper;
 
-        public CustomersController(CallCenterManagementAPIContext context)
-        {
-            _context = context;
-        }
+		public CustomersController(IRepository<Customer> repo, IMapper mapper, ILogger<CustomersController> logger)
+		{
+			_repo = repo;
+			_mapper = mapper;
+			_logger = logger;
+		}
 
-        //// GET: api/Customers
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Customer>>> GetCustomer()
-        //{
-        //  if (_context.Customer == null)
-        //  {
-        //      return NotFound();
-        //  }
-        //    return await _context.Customer.ToListAsync();
-        //}
+		// GET: api/Customers
+		[HttpGet]
+		public async Task<ActionResult<IEnumerable<Customer>>> GetCustomerListAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+		{
+			_logger.LogInformation("Getting all customers");
+			var customer = await _repo.GetAllAsync(pageNumber, pageSize);
+			return Ok(customer);
+		}
 
-        //// GET: api/Customers/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Customer>> GetCustomer(string id)
-        //{
-        //  if (_context.Customer == null)
-        //  {
-        //      return NotFound();
-        //  }
-        //    var customer = await _context.Customer.FindAsync(id);
+		// GET: api/Customers/5
+		[HttpGet("{id}")]
+		public async Task<ActionResult<Customer>> GetCustomer(int id)
+		{
+			_logger.LogInformation($"Getting Customer with ID {id}");
+			var customer = await _repo.GetByIdAsync(id);
 
-        //    if (customer == null)
-        //    {
-        //        return NotFound();
-        //    }
+			if (customer == null)
+			{
+				_logger.LogWarning($"Call with ID {id} not found");
+				return NotFound();
+			}
 
-        //    return customer;
-        //}
+			return Ok(customer);
+		}
 
-        //// PUT: api/Customers/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutCustomer(int id, Customer customer)
-        //{
-        //    if (id != customer.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+		// PUT: api/Customers/5
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPut]
+		public async Task<IActionResult> UpdateCustomer(UpdateCustomerDTO customerDTO)
+		{
+			_logger.LogInformation($"Updating Customer with ID {customerDTO.Id}");
+			var customer = _mapper.Map<Customer>(customerDTO);
+			await _repo.UpdateAsync(customer);
+			_logger.LogInformation($"Updated");
+			return Ok("Successfully Updated");
+		}
 
-        //    _context.Entry(customer).State = EntityState.Modified;
+		// POST: api/Customers
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPost]
+		public async Task<ActionResult<Customer>> CreateCustomer(CreateCustomerDTO customerDTO)
+		{
+			_logger.LogInformation("Adding a new customer");
+			var customer = _mapper.Map<Customer>(customerDTO);
+			await _repo.AddAsync(customer);
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CustomerExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+			_logger.LogInformation("Successfully added");
+			return Created("/api/customers/" + customer.Id, customer);
+		}
 
-        //    return NoContent();
-        //}
+		// DELETE: api/Customers/5
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteCustomer(int id)
+		{
+			_logger.LogInformation($"Deleting customer with ID {id}");
+			await _repo.DeleteAsync(id);
+			_logger.LogInformation($"Deleted");
 
-        //// POST: api/Customers
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
-        //{
-        //  if (_context.Customer == null)
-        //  {
-        //      return Problem("Entity set 'CallCenterManagementAPIContext.Customer'  is null.");
-        //  }
-        //    _context.Customer.Add(customer);
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        if (CustomerExists(customer.Id))
-        //        {
-        //            return Conflict();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+			return Ok("Sucessfully Deleted");
 
-        //    return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
-        //}
-
-        //// DELETE: api/Customers/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteCustomer(string id)
-        //{
-        //    if (_context.Customer == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var customer = await _context.Customer.FindAsync(id);
-        //    if (customer == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Customer.Remove(customer);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool CustomerExists(string id)
-        //{
-        //    return (_context.Customer?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
-    }
+		}
+	}
 }

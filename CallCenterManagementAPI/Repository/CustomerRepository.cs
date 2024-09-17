@@ -1,6 +1,7 @@
 ﻿using CallCenterManagementAPI.Data;
 using CallCenterManagementAPI.Interface;
 using CallCenterManagementAPI.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace CallCenterManagementAPI.Repository
 {
@@ -11,34 +12,38 @@ namespace CallCenterManagementAPI.Repository
 		{
 			_context = context;
 		}
-		public Task AddAsync(Customer entity)
+		public async Task AddAsync(Customer entity)
 		{
-			throw new NotImplementedException();
+			await _context.Customer.AddAsync(entity);
+			await _context.SaveChangesAsync();
 		}
 
-		public Task DeleteAsync(int id)
+		public async Task DeleteAsync(int id)
 		{
-			throw new NotImplementedException();
+			var customer = await _context.Customer.FindAsync(id);
+			if (customer != null)
+			{
+				customer.IsDeleted = true;
+				await _context.SaveChangesAsync();
+			}
 		}
 
-		public Task<IEnumerable<Customer>> GetAllAsync()
+		public async Task<IEnumerable<Customer>> GetAllAsync(int pageNumber, int pageSize)
 		{
-			throw new NotImplementedException();
+			return await _context.Customer.Skip((pageNumber - 1) * pageSize)
+				.Take(pageSize)
+				.ToListAsync();
 		}
 
-		public Task<IEnumerable<Customer>> GetAllAsync(int pageNumber, int pageSize)
+		public async Task<Customer> GetByIdAsync(int id)
 		{
-			throw new NotImplementedException();
+			return await _context.Customer.FirstOrDefaultAsync(r => r.Id == id);
 		}
 
-		public Task<Customer> GetByIdAsync(int id)
+		public async Task UpdateAsync(Customer entity)
 		{
-			throw new NotImplementedException();
-		}
-
-		public Task UpdateAsync(Customer entity)
-		{
-			throw new NotImplementedException();
+			_context.Entry(entity).State = EntityState.Modified;
+			await _context.SaveChangesAsync();
 		}
 	}
 }

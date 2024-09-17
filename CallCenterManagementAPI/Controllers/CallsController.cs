@@ -62,7 +62,7 @@ namespace CallCenterManagementAPI.Controllers
 		[Authorize]
 		public async Task<IActionResult> UpdateCallAsync(UpdateCallDTO callDto)
         {
-			_logger.LogInformation($"Updating running activity with ID {callDto.Id}");
+			_logger.LogInformation($"Updating call with ID {callDto.Id}");
 			var call = _mapper.Map<Call>(callDto);
 			await _repo.UpdateAsync(call);
 			_logger.LogInformation($"Updated");

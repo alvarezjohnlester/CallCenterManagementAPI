@@ -1,0 +1,15 @@
+meta {
+  name: DeleteCustomer
+  type: http
+  seq: 5
+}
+
+delete {
+  url: https://localhost:7135/api/Customers/2
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwianRpIjoiZjI3YTJiMjgtYjVjMC00MDEyLWFhZmMtYzg1ZDM3NjU3ODZlIiwiZXhwIjoxNzI2NTg4NjE5LCJpc3MiOiJDYWxsQ2VudGVyTWFuYWdlbWVudElzc3VlciIsImF1ZCI6IkNhbGxDZW50ZXJNYW5hZ2VtZW50QXVkaWVuY2UifQ.TxWxeD3XD97LGIdtWs07HnNsA1pvq8Mgeg4EL8aCbgo
+}

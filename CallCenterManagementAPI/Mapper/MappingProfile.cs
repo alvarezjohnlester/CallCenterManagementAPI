@@ -12,6 +12,8 @@ namespace CallCenterManagementAPI.Mapper
 			CreateMap<User, CreateUserDTO>().ReverseMap();
 			CreateMap<Call, UpdateCallDTO>().ReverseMap();
 			CreateMap<Call, CreateCallDTO>().ReverseMap();
+			CreateMap<Customer, UpdateCustomerDTO>().ReverseMap();
+			CreateMap<Customer, CreateCustomerDTO>().ReverseMap();
 		}
 	}
 }
