@@ -1,0 +1,21 @@
+meta {
+  name: UpdateAgent
+  type: http
+  seq: 5
+}
+
+put {
+  url: https://localhost:7135/api/Agents
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 0,
+    "name": "string",
+    "email": "string",
+    "phoneExtension": "string",
+    "status": 1
+  }
+}
