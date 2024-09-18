@@ -1,0 +1,19 @@
+meta {
+  name: CreateAgent
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://localhost:7135/api/Agents
+  body: json
+  auth: bearer
+}
+
+body:json {
+  {
+    "name": "test",
+    "email": "test",
+    "phoneExtension": "test"
+  }
+}

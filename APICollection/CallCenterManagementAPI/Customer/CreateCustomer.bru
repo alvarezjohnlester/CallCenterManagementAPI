@@ -1,0 +1,23 @@
+meta {
+  name: CreateCustomer
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://localhost:7135/api/Customers
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwianRpIjoiZjI3YTJiMjgtYjVjMC00MDEyLWFhZmMtYzg1ZDM3NjU3ODZlIiwiZXhwIjoxNzI2NTg4NjE5LCJpc3MiOiJDYWxsQ2VudGVyTWFuYWdlbWVudElzc3VlciIsImF1ZCI6IkNhbGxDZW50ZXJNYW5hZ2VtZW50QXVkaWVuY2UifQ.TxWxeD3XD97LGIdtWs07HnNsA1pvq8Mgeg4EL8aCbgo
+}
+
+body:json {
+  {
+    "Name":"test",
+    "Email":"test@email.com",
+    "PhoneNumber":"+639123213213"
+  }
+}

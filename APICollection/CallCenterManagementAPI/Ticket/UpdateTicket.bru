@@ -1,0 +1,27 @@
+meta {
+  name: UpdateTicket
+  type: http
+  seq: 4
+}
+
+put {
+  url: https://localhost:7135/api/Tickets
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwianRpIjoiYmNkNmI1MjUtZGIyZC00MDY3LTliM2EtNmE0OGMyOWEyMWI0IiwiZXhwIjoxNzI2NTkwNDM0LCJpc3MiOiJDYWxsQ2VudGVyTWFuYWdlbWVudElzc3VlciIsImF1ZCI6IkNhbGxDZW50ZXJNYW5hZ2VtZW50QXVkaWVuY2UifQ.POwgZUoCtJM-UZggVimzWNzlDb5dHDAlC0UR9Fa4kSU
+}
+
+body:json {
+  {
+    "Id":1,
+    "CustomerId":1,
+    "AgentId": 0,
+    "Status": 1,
+    "Priority": 1,
+    "Description": "test",
+    "Resolution": "test"
+  }
+}
