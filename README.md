@@ -55,14 +55,14 @@ Before you begin, make sure you have the following installed:
      
    - To Test the Endpoints, use must register first then use the credentials to generate token then use that token as Bearer Token to the API endpoints.
 
-### Project Assumptions and Key Design Choices
+## Project Assumptions and Key Design Choices
 
 Here are a few things we assumed while building this project. These assumptions helped us move forward, but they should be checked as the project evolves.
 - Team members are familiar with ASP.NET Core and related technologies.
 - Since we are using JWT for authentication, we need credentials. Therefore, a User model was created to manage these credentials.
 - The system will be able to handle up to 10,000 concurrent users without performance issues.
 
-### Approach
+## Approach
 1. **Coding**
    - We use Code Fist approach since we use EF Core and we already know the model details.
    - Created a Interface for the same endpoint method on every data models
