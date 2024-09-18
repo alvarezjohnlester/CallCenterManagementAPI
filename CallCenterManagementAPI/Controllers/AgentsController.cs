@@ -67,6 +67,24 @@ namespace CallCenterManagementAPI.Controllers
 			return Ok("Successfully Updated");
 		}
 
+		[HttpPut("UpdateStatus")]
+		public async Task<IActionResult> UpdateAgentStatus(UpdateAgentStatusDTO updateStatusDto)
+		{
+			_logger.LogInformation($"Updating status for agent with ID {updateStatusDto.Id}");
+			var agent = await _repo.GetByIdAsync(updateStatusDto.Id);
+
+			if (agent == null)
+			{
+				_logger.LogWarning($"Agent with ID {updateStatusDto.Id} not found");
+				return NotFound();
+			}
+
+			agent.Status = updateStatusDto.Status;
+			await _repo.UpdateAsync(agent);
+			_logger.LogInformation($"Updated status for agent with ID {updateStatusDto.Id}");
+			return Ok("Successfully Updated Status");
+		}
+
 		// POST: api/Agents
 		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 		[HttpPost]

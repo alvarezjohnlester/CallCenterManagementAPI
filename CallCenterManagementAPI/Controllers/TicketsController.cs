@@ -75,9 +75,30 @@ namespace CallCenterManagementAPI.Controllers
 			return Ok("Successfully Updated");
 		}
 
-        // POST: api/Tickets
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+		// PUT: api/Tickets/Assign
+		[HttpPut("Assign")]
+		[Authorize]
+		public async Task<IActionResult> AssignTicketToAgent(AssignTicketDTO assignTicketDto)
+		{
+			_logger.LogInformation($"Assigning ticket with ID {assignTicketDto.TicketId} to agent with ID {assignTicketDto.AgentId}");
+			var ticket = await _repo.GetByIdAsync(assignTicketDto.TicketId);
+
+			if (ticket == null)
+			{
+				_logger.LogWarning($"Ticket with ID {assignTicketDto.TicketId} not found");
+				return NotFound();
+			}
+
+			ticket.AgentId = assignTicketDto.AgentId;
+			ticket.Status = Enums.TicketStatus.InProgress;
+			await _repo.UpdateAsync(ticket);
+			_logger.LogInformation($"Assigned ticket with ID {assignTicketDto.TicketId} to agent with ID {assignTicketDto.AgentId}");
+			return Ok("Successfully Assigned Ticket to Agent");
+		}
+
+		// POST: api/Tickets
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPost]
         public async Task<ActionResult<Ticket>> CreateTicketAsync(CreateTicketDTO ticketDto)
         {
 			_logger.LogInformation("Adding a new ticket");

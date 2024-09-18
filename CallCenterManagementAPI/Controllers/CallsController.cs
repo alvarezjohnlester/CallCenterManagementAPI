@@ -68,10 +68,29 @@ namespace CallCenterManagementAPI.Controllers
 			_logger.LogInformation($"Updated");
 			return Ok("Successfully Updated");
 		}
+		// PUT: api/Calls/Assign
+		[HttpPut("Assign")]
+		[Authorize]
+		public async Task<IActionResult> AssignCallToAgent(AssignCallDTO assignCallDto)
+		{
+			_logger.LogInformation($"Assigning call with ID {assignCallDto.CallId} to agent with ID {assignCallDto.AgentId}");
+			var call = await _repo.GetByIdAsync(assignCallDto.CallId);
 
-        // POST: api/Calls
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+			if (call == null)
+			{
+				_logger.LogWarning($"Call with ID {assignCallDto.CallId} not found");
+				return NotFound();
+			}
+
+			call.AgentId = assignCallDto.AgentId;
+			call.Status = Enums.CallStatus.InProgress;
+			await _repo.UpdateAsync(call);
+			_logger.LogInformation($"Assigned call with ID {assignCallDto.CallId} to agent with ID {assignCallDto.AgentId}");
+			return Ok("Successfully Assigned Call to Agent");
+		}
+		// POST: api/Calls
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPost]
 		[Authorize]
 		public async Task<ActionResult<Call>> CreateCall(CreateCallDTO callDTO)
         {

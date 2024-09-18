@@ -1,11 +1,11 @@
 meta {
-  name: CreateCall
+  name: AssignCall
   type: http
-  seq: 3
+  seq: 6
 }
 
-post {
-  url: https://localhost:7135/api/Calls
+put {
+  url: https://localhost:7135/api/Calls/Assign
   body: json
   auth: bearer
 }
@@ -16,10 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "CustomerId": 1,
-    "AgentId": 0,
-    "StartTime": "2023-09-17T15:30:00Z",
-    "EndTime": null,
-    "Notes": "test"
+    "CallId": 2,
+    "AgentId": 1
   }
 }
