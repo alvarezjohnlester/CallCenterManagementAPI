@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CallCenterManagementAPI.Repository
 {
-	public class AgentRepository : IRepository<Agent>
+	public class AgentRepository : IAgentRepository
 	{
 		private readonly CallCenterManagementAPIContext _context;
 		public AgentRepository(CallCenterManagementAPIContext context)
@@ -44,6 +44,12 @@ namespace CallCenterManagementAPI.Repository
 		{
 			_context.Entry(entity).State = EntityState.Modified;
 			await _context.SaveChangesAsync();
+		}
+		public async Task<IEnumerable<Agent>> GetAvailableAgentsAsync()
+		{
+			return await _context.Agent
+				.Where(agent => agent.Status == Enums.AgentStatus.Available && !agent.IsDeleted)
+				.ToListAsync();
 		}
 	}
 }

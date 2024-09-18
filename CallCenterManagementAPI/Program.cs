@@ -37,7 +37,8 @@ namespace CallCenterManagementAPI
 			builder.Services.AddScoped<IRepository<Ticket>, TicketRepository>();
 			builder.Services.AddScoped<IUserRepository, UserRepository>();
 			builder.Services.AddScoped<TokenService>();
-
+			builder.Services.AddScoped<ICallRoutingService, CallRoutingService>();
+			builder.Services.AddScoped<IAgentRepository, AgentRepository>();
 			// Add authentication services
 			builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
