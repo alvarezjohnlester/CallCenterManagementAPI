@@ -53,7 +53,9 @@ namespace CallCenterManagementAPI.Controllers
 			}
 
 			var token = _tokenService.GenerateToken(user.Username);
-			return Ok(new { token });
+			TokenResponse tokenResponse = new TokenResponse();
+			tokenResponse.Token = token;
+			return Ok(tokenResponse);
 		}
 	}
 }
